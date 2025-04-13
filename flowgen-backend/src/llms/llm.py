@@ -1,6 +1,7 @@
 from google.protobuf.any import is_type
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_deepseek import ChatDeepSeek
+from langchain_anthropic import ChatAnthropic
 from src.llms.litellm_v2 import ChatLiteLLMV2 as ChatLiteLLM
 from src.config import load_yaml_config
 from typing import Optional
@@ -113,8 +114,27 @@ def create_litellm_model(
     return ChatLiteLLM(**llm_kwargs)
 
 
+def create_anthropic_llm(
+    model: str,
+    base_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+    temperature: float = 0.0,
+    **kwargs,
+) -> ChatAnthropic:
+    """
+    Create a ChatAnthropic instance with the specified configuration
+    """
+    llm_kwargs = {
+        "model": model,
+        "temperature": temperature,
+        "anthropic_api_key": api_key,
+        **kwargs
+    }
+    return ChatAnthropic(**llm_kwargs)
+
+
 # Cache for LLM instances
-_llm_cache: dict[LLMType, ChatOpenAI | ChatDeepSeek | AzureChatOpenAI | ChatLiteLLM] = (
+_llm_cache: dict[LLMType, ChatOpenAI | ChatDeepSeek | AzureChatOpenAI | ChatLiteLLM | ChatAnthropic] = (
     {}
 )
 
@@ -138,7 +158,7 @@ def is_litellm_model(model_name: str) -> bool:
 
 def _create_llm_use_env(
     llm_type: LLMType,
-) -> ChatOpenAI | ChatDeepSeek | AzureChatOpenAI | ChatLiteLLM:
+) -> ChatOpenAI | ChatDeepSeek | AzureChatOpenAI | ChatLiteLLM | ChatAnthropic:
     if llm_type == "reasoning":
         if REASONING_AZURE_DEPLOYMENT:
             llm = create_azure_llm(
@@ -149,6 +169,12 @@ def _create_llm_use_env(
             )
         elif is_litellm_model(REASONING_MODEL):
             llm = create_litellm_model(
+                model=REASONING_MODEL,
+                base_url=REASONING_BASE_URL,
+                api_key=REASONING_API_KEY,
+            )
+        elif REASONING_BASE_URL and "anthropic" in REASONING_BASE_URL:
+            llm = create_anthropic_llm(
                 model=REASONING_MODEL,
                 base_url=REASONING_BASE_URL,
                 api_key=REASONING_API_KEY,
@@ -174,6 +200,12 @@ def _create_llm_use_env(
                 base_url=BASIC_BASE_URL,
                 api_key=BASIC_API_KEY,
             )
+        elif BASIC_BASE_URL and "anthropic" in BASIC_BASE_URL:
+            llm = create_anthropic_llm(
+                model=BASIC_MODEL,
+                base_url=BASIC_BASE_URL,
+                api_key=BASIC_API_KEY,
+            )
         else:
             llm = create_openai_llm(
                 model=BASIC_MODEL,
@@ -190,6 +222,12 @@ def _create_llm_use_env(
             )
         elif is_litellm_model(VL_MODEL):
             llm = create_litellm_model(
+                model=VL_MODEL,
+                base_url=VL_BASE_URL,
+                api_key=VL_API_KEY,
+            )
+        elif VL_BASE_URL and "anthropic" in VL_BASE_URL:
+            llm = create_anthropic_llm(
                 model=VL_MODEL,
                 base_url=VL_BASE_URL,
                 api_key=VL_API_KEY,

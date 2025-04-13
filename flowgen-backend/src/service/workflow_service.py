@@ -277,13 +277,53 @@ def _handle_chat_model_stream(
         return
 
     # Handle messages from other agents
-    yield {
-        "event": "message",
-        "data": {
-            "message_id": data["chunk"].id,
-            "delta": {"content": content},
-        },
-    }
+    if isinstance(content, str):
+        yield {
+            "event": "message",
+            "data": {
+                "message_id": data["chunk"].id,
+                "delta": {"content": content},
+            },
+        }
+    elif isinstance(content, list) and content:
+        print(content)
+        thinking_mode = False
+        for item in content:
+            if "thinking" in item:
+                if not thinking_mode:
+                    yield {
+                        "event": "message",
+                        "data": {
+                            "message_id": data["chunk"].id,
+                            "delta": {"content": "<think>" + item["thinking"]},
+                        },
+                    }
+                    thinking_mode = True
+                else:
+                    yield {
+                        "event": "message",
+                        "data": {
+                            "message_id": data["chunk"].id,
+                            "delta": {"content": item["thinking"]},
+                        },
+                    }
+            elif "signature" in item and thinking_mode:
+                yield {
+                    "event": "message",
+                    "data": {
+                        "message_id": data["chunk"].id,
+                        "delta": {"content": "</think>"},
+                    },
+                }
+                thinking_mode = False
+            elif "text" in item:
+                yield {
+                    "event": "message",
+                    "data": {
+                        "message_id": data["chunk"].id,
+                        "delta": {"content": item["text"]},
+                    },
+                }
 
 
 def _handle_tool_start(node, name, data, workflow_id, run_id):

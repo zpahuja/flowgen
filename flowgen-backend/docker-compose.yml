@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: flowgen
+    container_name: flowgen-backend
     ports:
       - "8000:8000"
     environment:
