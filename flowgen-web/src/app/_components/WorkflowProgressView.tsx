@@ -183,17 +183,28 @@ function PlanTaskView({ task }: { task: ThinkingTask }) {
   }>(() => {
     if (task.payload.text) {
       let jsonString = task.payload.text.trim();
-      if (jsonString.startsWith("```json\n")) {
-        jsonString = jsonString.substring(7);
-      } else if (jsonString.startsWith("```ts\n")) {
-        jsonString = jsonString.substring(5);
+      
+      // Remove any markdown code block markers
+      jsonString = jsonString.replace(/^```(?:json|ts)?\n/, '');
+      jsonString = jsonString.replace(/\n```$/, '');
+      
+      // Clean up any remaining whitespace
+      jsonString = jsonString.trim();
+      
+      // If the string is empty after cleaning, return empty object
+      if (!jsonString) {
+        return {};
       }
-      if (jsonString.endsWith("\n```")) {
-        jsonString = jsonString.substring(0, jsonString.length - 3);
-      }
+      
       try {
-        return parse(jsonString);
-      } catch {
+        const parsed = parse(jsonString);
+        // Validate the parsed object has the expected structure
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed;
+        }
+        return {};
+      } catch (error) {
+        console.warn('Failed to parse JSON:', error);
         return {};
       }
     }

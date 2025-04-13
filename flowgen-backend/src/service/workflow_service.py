@@ -94,7 +94,12 @@ async def run_agent_workflow(
                 "search_before_planning": search_before_planning,
             },
             # client could send this param to talk with a specific thread.
-            config={"configurable": {"thread_id": thread_id}},
+            config={
+                "configurable": {
+                    "thread_id": thread_id,
+                    "recursion_limit": 25,
+                }
+            },
             version="v2",
         ):
             kind, data, name, node, langgraph_step, run_id = _extract_event_data(event)
