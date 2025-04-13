@@ -1,21 +1,18 @@
 # if true, use conf.yaml, else use original .env config, default false
-USE_CONF: true
+USE_CONF: false
 
 # LLM Config
-## follow litellm config: https://docs.litellm.ai/docs/providers
 REASONING_MODEL:
-  model: "volcengine/ep-xxxx"
+  model: "claude-3-7-sonnet-latest"
   api_key: $REASONING_API_KEY
-  api_base: $REASONING_BASE_URL
+  api_base: "https://api.anthropic.com"
 
 BASIC_MODEL:
-  model: "azure/gpt-4o-2024-08-06"
-  api_base: $AZURE_API_BASE
-  api_version: $AZURE_API_VERSION
-  api_key: $AZURE_API_KEY
+  model: "claude-3-7-sonnet-latest"
+  api_key: $BASIC_API_KEY
+  api_base: "https://api.anthropic.com"
 
 VISION_MODEL:
-  model: "azure/gpt-4o-2024-08-06"
-  api_base: $AZURE_API_BASE
-  api_version: $AZURE_API_VERSION
-  api_key: $AZURE_API_KEY
+  model: "claude-3-7-sonnet-latest"
+  api_key: $VL_API_KEY
+  api_base: "https://api.anthropic.com"
