@@ -18,7 +18,7 @@ services:
 
   frontend:
     build:
-      context: ./flowgen-web
+      context: ../flowgen-web
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
