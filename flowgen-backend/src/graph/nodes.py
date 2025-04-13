@@ -28,6 +28,14 @@ def handoff_to_planner():
     return
 
 
+@tool
+def handoff_to_supervisor():
+    """Handoff to supervisor agent to execute plan."""
+    # This tool is not returning anything: we're just using it
+    # as a way for LLM to signal that it needs to hand off to supervisor agent
+    return
+
+
 def research_node(state: State) -> Command[Literal["supervisor"]]:
     """Node for the researcher agent that performs research tasks."""
     logger.info("Research agent starting task")
@@ -124,14 +132,40 @@ def supervisor_node(state: State) -> Command[Literal[*TEAM_MEMBERS, "__end__"]]:
     return Command(goto=goto, update={"next": goto})
 
 
-def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
+def request_plan_feedback(state: State) -> Command[Literal["__end__"]]:
+    """Node that asks user for feedback on the plan."""
+    logger.info("Requesting plan feedback from user")
+    messages = apply_prompt_template("plan_feedback", state)
+    response = (
+        get_llm_by_type(AGENT_LLM_MAP["coordinator"])
+        .invoke(messages)
+    )
+    
+    response_content = response.content
+    if isinstance(response_content, list):
+        response_content = response_content[0].get("text", "")
+    
+    return Command(
+        update={
+            "messages": [
+                HumanMessage(
+                    content=response_content,
+                    name="request_plan_feedback",
+                )
+            ]
+        },
+        goto="__end__",
+    )
+
+
+def planner_node(state: State) -> Command[Literal["request_plan_feedback", "__end__"]]:
     """Planner node that generate the full plan."""
     logger.info("Planner generating full plan")
     messages = apply_prompt_template("planner", state)
     # whether to enable deep thinking mode
     llm = get_llm_by_type("basic")
-    if state.get("deep_thinking_mode"):
-        llm = get_llm_by_type("reasoning")
+    # if state.get("deep_thinking_mode"):
+    #     llm = get_llm_by_type("reasoning")
     if state.get("search_before_planning"):
         # Rewrite the query using LLM before searching
         query_messages = apply_prompt_template("query_rewriter", state)
@@ -163,7 +197,7 @@ def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
     logger.debug(f"Current state messages: {state['messages']}")
     logger.debug(f"Planner response: {full_response}")
 
-    goto = "supervisor"
+    goto = "request_plan_feedback"
     try:
         full_response = repair_json_output(full_response)
     except json.JSONDecodeError:
@@ -179,13 +213,13 @@ def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
     )
 
 
-def coordinator_node(state: State) -> Command[Literal["planner", "__end__"]]:
+def coordinator_node(state: State) -> Command[Literal["planner", "supervisor", "__end__"]]:
     """Coordinator node that communicate with customers."""
     logger.info("Coordinator talking.")
     messages = apply_prompt_template("coordinator", state)
     response = (
         get_llm_by_type(AGENT_LLM_MAP["coordinator"])
-        .bind_tools([handoff_to_planner])
+        .bind_tools([handoff_to_planner, handoff_to_supervisor])
         .invoke(messages)
     )
     logger.debug(f"Current state messages: {state['messages']}")
@@ -195,8 +229,18 @@ def coordinator_node(state: State) -> Command[Literal["planner", "__end__"]]:
         response_content = response_content[0].get("text", "")
 
     goto = "__end__"
-    if len(response.tool_calls) > 0:
-        goto = "planner"
+    for tool_call in response.tool_calls:
+        if isinstance(tool_call, dict):
+            tool_name = tool_call.get("name", "")
+        else:
+            tool_name = tool_call.name
+            
+        if tool_name == "handoff_to_planner":
+            goto = "planner"
+            break
+        elif tool_name == "handoff_to_supervisor":
+            goto = "supervisor"
+            break
 
     return Command(
         update={

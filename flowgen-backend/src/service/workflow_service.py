@@ -116,6 +116,7 @@ async def run_agent_workflow(
                 run_id,
                 user_input_messages,
                 team_members,
+                is_workflow_triggered,
             ):
                 if ydata:
                     if ydata.get("event") == "start_of_workflow":
@@ -169,12 +170,13 @@ def _process_event(
     run_id: str,
     user_input_messages: List[Dict[str, Any]],
     team_members: Optional[List[str]],
+    is_workflow_triggered: bool,
 ) -> Generator[Dict[str, Any], None, None]:
     """Process events and return corresponding output data"""
     # Handle chain start events
     if kind == EventType.CHAIN_START.value and name in STREAMING_LLM_AGENTS:
         yield from _handle_chain_start(
-            name, workflow_id, langgraph_step, user_input_messages
+            name, workflow_id, langgraph_step, user_input_messages, is_workflow_triggered
         )
 
     # Handle chain end events
@@ -209,22 +211,33 @@ def _handle_chain_start(
     workflow_id: str,
     langgraph_step: str,
     user_input_messages: List[Dict[str, Any]],
+    is_workflow_triggered: bool,
 ) -> Generator[Dict[str, Any], None, None]:
     """Handle chain start events"""
-    # If it's the planner, generate workflow start event
-    if name == "planner":
+    # Generate workflow start event if not already triggered
+    # It can be started by planner, coder, researcher, or browser
+    if not is_workflow_triggered and (name in ["planner", "coder", "researcher", "browser"]):
+        logger.debug(f"Generating start of workflow event for {name}")
         yield {
             "event": "start_of_workflow",
             "data": {"workflow_id": workflow_id, "input": user_input_messages},
         }
-
-    yield {
-        "event": "start_of_agent",
-        "data": {
-            "agent_name": name,
-            "agent_id": f"{workflow_id}_{name}_{langgraph_step}",
-        },
-    }
+    
+    # End workflow if request_plan_feedback is reached
+    if name == "request_plan_feedback":
+        yield {
+            "event": "end_of_workflow",
+            "data": {"workflow_id": workflow_id},
+        }
+        is_workflow_triggered = False
+    else:
+        yield {
+            "event": "start_of_agent",
+            "data": {
+                "agent_name": name,
+                "agent_id": f"{workflow_id}_{name}_{langgraph_step}",
+            },
+        }
 
 
 def _handle_chain_end(
@@ -334,6 +347,7 @@ def _generate_final_events(
             "event": "end_of_workflow",
             "data": {"workflow_id": workflow_id},
         }
+        is_workflow_triggered = False
 
     yield {
         "event": "final_session_state",

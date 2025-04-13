@@ -9,6 +9,7 @@ from .nodes import (
     browser_node,
     reporter_node,
     planner_node,
+    request_plan_feedback,
 )
 
 
@@ -23,6 +24,7 @@ def build_graph():
     builder.add_edge(START, "coordinator")
     builder.add_node("coordinator", coordinator_node)
     builder.add_node("planner", planner_node)
+    builder.add_node("request_plan_feedback", request_plan_feedback)
     builder.add_node("supervisor", supervisor_node)
     builder.add_node("researcher", research_node)
     builder.add_node("coder", code_node)
