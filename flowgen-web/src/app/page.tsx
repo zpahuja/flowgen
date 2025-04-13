@@ -21,10 +21,7 @@ export default function HomePage() {
   const responding = useStore((state) => state.responding);
 
   const handleSendMessage = useCallback(
-    async (
-      content: string,
-      config: { deepThinkingMode: boolean; searchBeforePlanning: boolean },
-    ) => {
+    async (content: string) => {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
       await sendMessage(
@@ -34,7 +31,6 @@ export default function HomePage() {
           type: "text",
           content,
         },
-        config,
         { abortSignal: abortController.signal },
       );
       abortControllerRef.current = null;
@@ -74,12 +70,12 @@ export default function HomePage() {
                 </h3>
                 <div className="px-4 text-center text-lg text-gray-400">
                   <a
-                    href="https://github.com/langmanus/langmanus"
+                    href="https://usher.chat"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:text-blue-600"
+                    className="hover:text-blue-600"
                   >
-                    LangManus
+                    Usher
                   </a>
                   , built on cutting-edge language models, helps you search on
                   web, browse information, and handle complex tasks.

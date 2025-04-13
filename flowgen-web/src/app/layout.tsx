@@ -4,9 +4,9 @@ import { type Metadata } from "next";
 import "~/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "🦜🤖 LangManus",
+  title: "Usher",
   description:
-    "A community-driven AI automation framework that builds upon the incredible work of the open source community.",
+    "Usher is a general AI agent to build bespoke AI agents that bridge reasoning and actions: it doesn't just think, it delivers results — getting everything done while you rest.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

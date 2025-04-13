@@ -1,4 +1,5 @@
 import { env } from "~/env";
+import { nanoid } from "nanoid";
 
 import { type Message } from "../messaging";
 import { fetchStream } from "../sse";
@@ -9,8 +10,6 @@ export function chatStream(
   userMessage: Message,
   state: { messages: { role: string; content: string }[] },
   params: {
-    deepThinkingMode: boolean;
-    searchBeforePlanning: boolean;
     teamMembers: string[];
   },
   options: { abortSignal?: AbortSignal } = {},
@@ -19,10 +18,10 @@ export function chatStream(
     (env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api") + "/chat/stream",
     {
       body: JSON.stringify({
-        // TODO: add `thread_id` in the future
+        thread_id: nanoid(),
         messages: [userMessage],
-        deep_thinking_mode: params.deepThinkingMode,
-        search_before_planning: params.searchBeforePlanning,
+        deep_thinking_mode: true,
+        search_before_planning: true,
         debug:
           location.search.includes("debug") &&
           !location.search.includes("debug=false"),
@@ -50,7 +49,7 @@ export async function queryTeamMembers() {
     ];
   } catch (err) {
     console.warn(
-      "🖐️️ [langmanus]\n\nError connecting to langmanus backend. Please ensure the latest version is running locally. See: https://github.com/langmanus/langmanus.\n\nRaw network error: ",
+      "🖐️️ [flowgen]\n\nError connecting to flowgen backend. Please ensure the latest version is running locally. See: https://github.com/zpahuja/flowgen.\n\nRaw network error: ",
     );
     console.error(err);
     return [];

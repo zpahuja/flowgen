@@ -1,6 +1,5 @@
 import {
   ArrowUpOutlined,
-  GlobalOutlined,
   RobotOutlined,
 } from "@ant-design/icons";
 import { type KeyboardEvent, useCallback, useEffect, useState } from "react";
@@ -19,7 +18,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { Atom } from "~/core/icons";
 import { setEnabledTeamMembers, useStore } from "~/core/store";
 import { cn } from "~/core/utils";
 
@@ -33,26 +31,14 @@ export function InputBox({
   className?: string;
   size?: "large" | "normal";
   responding?: boolean;
-  onSend?: (
-    message: string,
-    options: { deepThinkingMode: boolean; searchBeforePlanning: boolean },
-  ) => void;
+  onSend?: (message: string) => void;
   onCancel?: () => void;
 }) {
   const teamMembers = useStore((state) => state.teamMembers);
   const enabledTeamMembers = useStore((state) => state.enabledTeamMembers);
 
   const [message, setMessage] = useState("");
-  const [deepThinkingMode, setDeepThinkMode] = useState(false);
-  const [searchBeforePlanning, setSearchBeforePlanning] = useState(false);
   const [imeStatus, setImeStatus] = useState<"active" | "inactive">("inactive");
-
-  const saveConfig = useCallback(() => {
-    localStorage.setItem(
-      "langmanus.config.inputbox",
-      JSON.stringify({ deepThinkingMode, searchBeforePlanning }),
-    );
-  }, [deepThinkingMode, searchBeforePlanning]);
 
   const handleSendMessage = useCallback(() => {
     if (responding) {
@@ -62,18 +48,11 @@ export function InputBox({
         return;
       }
       if (onSend) {
-        onSend(message, { deepThinkingMode, searchBeforePlanning });
+        onSend(message);
         setMessage("");
       }
     }
-  }, [
-    responding,
-    onCancel,
-    message,
-    onSend,
-    deepThinkingMode,
-    searchBeforePlanning,
-  ]);
+  }, [responding, onCancel, message, onSend]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -94,28 +73,15 @@ export function InputBox({
     [responding, imeStatus, handleSendMessage],
   );
 
-  useEffect(() => {
-    const config = localStorage.getItem("langmanus.config.inputbox");
-    if (config) {
-      const { deepThinkingMode, searchBeforePlanning } = JSON.parse(config);
-      setDeepThinkMode(deepThinkingMode);
-      setSearchBeforePlanning(searchBeforePlanning);
-    }
-  }, []);
-
-  useEffect(() => {
-    saveConfig();
-  }, [deepThinkingMode, searchBeforePlanning, saveConfig]);
-
   return (
     <div className={cn(className)}>
       <div className="w-full">
         <textarea
           className={cn(
             "m-0 w-full resize-none border-none px-4 py-3 text-lg",
-            size === "large" ? "min-h-32" : "min-h-4",
+            size === "large" ? "min-h-12" : "min-h-4",
           )}
-          placeholder="What can I do for you?"
+          placeholder="What will you automate today?"
           value={message}
           onCompositionStart={() => setImeStatus("active")}
           onCompositionEnd={() => setImeStatus("inactive")}
@@ -182,54 +148,6 @@ export function InputBox({
               <p>Enable or disable agents</p>
             </TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn("rounded-2xl px-4 text-sm", {
-                  "border-blue-300 bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-600":
-                    deepThinkingMode,
-                })}
-                onClick={() => {
-                  setDeepThinkMode(!deepThinkingMode);
-                }}
-              >
-                <Atom className="h-4 w-4" />
-                <span>Deep Think</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                Deep thinking mode. Think before planning.
-                <br />
-                <br />
-                <span className="text-xs text-gray-300">
-                  This feature may cost more tokens and time.
-                </span>
-              </p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn("rounded-2xl px-4 text-sm", {
-                  "border-blue-300 bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-600":
-                    searchBeforePlanning,
-                })}
-                onClick={() => {
-                  setSearchBeforePlanning(!searchBeforePlanning);
-                }}
-              >
-                <GlobalOutlined className="h-4 w-4" />
-                <span>Search</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Search before planning</p>
-            </TooltipContent>
-          </Tooltip>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Tooltip>
@@ -248,7 +166,7 @@ export function InputBox({
                     <div className="h-4 w-4 rounded-sm bg-red-300" />
                   </div>
                 ) : (
-                  <ArrowUpOutlined />
+                  <ArrowUpOutlined className="h-4 w-4" />
                 )}
               </Button>
             </TooltipTrigger>

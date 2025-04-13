@@ -37,7 +37,7 @@ export const useStore = create<{
 export function useInitTeamMembers() {
   useEffect(() => {
     const enabledTeamMembers = localStorage.getItem(
-      "langmanus.config.enabledTeamMembers",
+      "flowgen.config.enabledTeamMembers",
     );
     void queryTeamMembers().then((teamMembers) => {
       useStore.setState({
@@ -53,7 +53,7 @@ export function useInitTeamMembers() {
 export function setEnabledTeamMembers(enabledTeamMembers: string[]) {
   useStore.setState({ enabledTeamMembers });
   localStorage.setItem(
-    "langmanus.config.enabledTeamMembers",
+    "flowgen.config.enabledTeamMembers",
     JSON.stringify(enabledTeamMembers),
   );
 }
@@ -85,10 +85,6 @@ export function updateMessage(message: Partial<Message> & { id: string }) {
 
 export async function sendMessage(
   message: Message,
-  params: {
-    deepThinkingMode: boolean;
-    searchBeforePlanning: boolean;
-  },
   options: { abortSignal?: AbortSignal } = {},
 ) {
   addMessage(message);
@@ -100,7 +96,6 @@ export async function sendMessage(
       message,
       useStore.getState().state,
       {
-        ...params,
         teamMembers: useStore.getState().enabledTeamMembers,
       },
       options,
