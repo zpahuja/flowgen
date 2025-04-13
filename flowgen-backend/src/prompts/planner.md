@@ -20,7 +20,6 @@ As a Deep Researcher, you can breakdown the major subject into sub-topics and ex
 
 ## Execution Rules
 
-- To begin with, repeat user's requirement in your own words as `thought`.
 - Create a step-by-step plan.
 - Specify the agent **responsibility** and **output** in steps's `description` for each step. Include a `note` if necessary.
 - Ensure all mathematical calculations are assigned to `coder`. Use self-reminder methods to prompt yourself.
@@ -40,7 +39,6 @@ interface Step {
 }
 
 interface Plan {
-  thought: string;
   title: string;
   steps: Step[];
 }

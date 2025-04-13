@@ -81,7 +81,7 @@ export function InputBox({
             "m-0 w-full resize-none border-none px-4 py-3 text-lg",
             size === "large" ? "min-h-12" : "min-h-4",
           )}
-          placeholder="What will you automate today?"
+          placeholder="What can I do for you?"
           value={message}
           onCompositionStart={() => setImeStatus("active")}
           onCompositionEnd={() => setImeStatus("inactive")}

@@ -133,7 +133,15 @@ def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
     if state.get("deep_thinking_mode"):
         llm = get_llm_by_type("reasoning")
     if state.get("search_before_planning"):
-        searched_content = tavily_tool.invoke({"query": state["messages"][-1].content})
+        # Rewrite the query using LLM before searching
+        query_messages = apply_prompt_template("query_rewriter", state)
+        rewritten_query = get_llm_by_type("basic").invoke(query_messages).content
+        if isinstance(rewritten_query, list):
+            rewritten_query = rewritten_query[0].get("text", "")
+        logger.debug(f"Original query: {state['messages'][-1].content}")
+        logger.debug(f"Rewritten query: {rewritten_query}")
+        
+        searched_content = tavily_tool.invoke({"query": rewritten_query})
         if isinstance(searched_content, list):
             messages = deepcopy(messages)
             messages[
@@ -153,7 +161,7 @@ def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
                 if "text" in item:
                     full_response += item["text"]
     logger.debug(f"Current state messages: {state['messages']}")
-    logger.info(f"Planner response: {full_response}")
+    logger.debug(f"Planner response: {full_response}")
 
     goto = "supervisor"
     try:
