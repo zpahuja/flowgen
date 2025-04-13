@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 
 import { type Message } from "../messaging";
 import { fetchStream } from "../sse";
+import { useStore } from "../store";
 
 import { type TeamMember, type ChatEvent } from "./types";
 
@@ -14,11 +15,12 @@ export function chatStream(
   },
   options: { abortSignal?: AbortSignal } = {},
 ) {
+  const thread_id = useStore.getState().thread_id;
   return fetchStream<ChatEvent>(
     (env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api") + "/chat/stream",
     {
       body: JSON.stringify({
-        thread_id: nanoid(),
+        thread_id,
         messages: [userMessage],
         deep_thinking_mode: true,
         search_before_planning: true,

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { create } from "zustand";
+import { nanoid } from "nanoid";
 
 import {
   type ChatEvent,
@@ -21,6 +22,7 @@ export const useStore = create<{
   enabledTeamMembers: string[];
   messages: Message[];
   responding: boolean;
+  thread_id: string;
   state: {
     messages: { role: string; content: string }[];
   };
@@ -29,6 +31,7 @@ export const useStore = create<{
   enabledTeamMembers: [],
   messages: [],
   responding: false,
+  thread_id: nanoid(),
   state: {
     messages: [],
   },
