@@ -2,9 +2,8 @@ import logging
 from src.config import TEAM_MEMBER_CONFIGRATIONS, TEAM_MEMBERS
 from src.graph import build_graph
 
-# Configure logging
 logging.basicConfig(
-    level=logging.INFO,  # Default level is INFO
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 

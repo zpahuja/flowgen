@@ -1,12 +1,11 @@
 """
-Server script for running the LangManus API.
+Server script for running the Flowgen API.
 """
 
 import logging
 import uvicorn
 import sys
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -15,7 +14,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    logger.info("Starting LangManus API server")
+    logger.info("Starting Flowgen API server")
     reload = True
     if sys.platform.startswith("win"):
         reload = False

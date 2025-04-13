@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: langmanus-backend
+    container_name: flowgen
     ports:
       - "8000:8000"
     environment:
@@ -14,15 +14,15 @@ services:
       - .env
     restart: unless-stopped
     networks:
-      - langmanus-network
+      - flowgen-network
 
   frontend:
     build:
-      context: https://github.com/langmanus/langmanus-web.git#main
+      context: ./flowgen-web
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-    container_name: langmanus-frontend
+    container_name: flowgen-frontend
     ports:
       - "3000:3000"
     environment:
@@ -31,8 +31,8 @@ services:
       - backend
     restart: unless-stopped
     networks:
-      - langmanus-network
+      - flowgen-network
 
 networks:
-  langmanus-network:
+  flowgen-network:
     driver: bridge
