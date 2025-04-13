@@ -178,6 +178,9 @@ def _create_llm_use_env(
                 model=REASONING_MODEL,
                 base_url=REASONING_BASE_URL,
                 api_key=REASONING_API_KEY,
+                max_tokens=5000,
+                thinking={"type": "enabled", "budget_tokens": 2000},
+                temperature=1.0,
             )
         else:
             llm = create_deepseek_llm(

@@ -146,9 +146,14 @@ def planner_node(state: State) -> Command[Literal["supervisor", "__end__"]]:
     stream = llm.stream(messages)
     full_response = ""
     for chunk in stream:
-        full_response += chunk.content
+        if isinstance(chunk.content, str):
+            full_response += chunk.content
+        elif isinstance(chunk.content, list):
+            for item in chunk.content:
+                if "text" in item:
+                    full_response += item["text"]
     logger.debug(f"Current state messages: {state['messages']}")
-    logger.debug(f"Planner response: {full_response}")
+    logger.info(f"Planner response: {full_response}")
 
     goto = "supervisor"
     try:
