@@ -109,14 +109,13 @@ export function InputBox({
                 </TooltipTrigger>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Agents</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {teamMembers.map((member) => (
+                {teamMembers
+                  .filter((member) => member.is_optional)
+                  .map((member) => (
                   <Tooltip key={member.name}>
                     <TooltipTrigger asChild>
                       <DropdownMenuCheckboxItem
                         key={member.name}
-                        disabled={!member.is_optional}
                         checked={enabledTeamMembers.includes(member.name)}
                         onCheckedChange={() => {
                           setEnabledTeamMembers(
@@ -130,11 +129,6 @@ export function InputBox({
                       >
                         {member.name.charAt(0).toUpperCase() +
                           member.name.slice(1)}
-                        {member.is_optional && (
-                          <span className="text-xs text-gray-400">
-                            (Optional)
-                          </span>
-                        )}
                       </DropdownMenuCheckboxItem>
                     </TooltipTrigger>
                     <TooltipContent side="right">

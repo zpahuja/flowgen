@@ -74,11 +74,11 @@ export default function HomePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-blue-600"
-                  >
-                    Usher
-                  </a>
-                  , built on cutting-edge language models, helps you search on
-                  web, browse information, and handle complex tasks.
+                  >Usher
+                  </a> searches the web, writes code, and integrates with all your tools 
+                </div>
+                <div className="px-4 text-center text-lg text-gray-400">
+                  — to automate complex workflows.
                 </div>
               </div>
             )}
