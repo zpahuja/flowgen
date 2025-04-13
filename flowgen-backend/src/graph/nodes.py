@@ -190,25 +190,25 @@ def coordinator_node(state: State) -> Command[Literal["planner", "__end__"]]:
     )
     logger.debug(f"Current state messages: {state['messages']}")
 
+    response_content = response.content
+    if isinstance(response_content, list):
+        response_content = response_content[0].get("text", "")
+
     goto = "__end__"
     if len(response.tool_calls) > 0:
         goto = "planner"
-    else:
-        # Add the response to messages when it's not a tool call
-        response_content = response.content
-        if isinstance(response_content, list):
-            response_content = response_content[0].get("text", "")
-        return Command(
-            update={
-                "messages": [
-                    HumanMessage(
-                        content=response_content,
-                        name="coordinator",
-                    )
-                ]
-            },
-            goto=goto,
-        )
+
+    return Command(
+        update={
+            "messages": [
+                HumanMessage(
+                    content=response_content,
+                    name="coordinator",
+                )
+            ]
+        },
+        goto=goto,
+    )
 
 
 def reporter_node(state: State) -> Command[Literal["supervisor"]]:
